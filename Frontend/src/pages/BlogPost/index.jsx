@@ -7,20 +7,19 @@ import Typography from "../../components/Typography";
 import { CommentList } from "../../components/CommentList";
 import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ModalComment } from "../../components/ModalComment";
 
 export const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-
-  const post = posts.find((p) => p.slug == slug);
+  const [post, setPost] = useState(null)
 
   useEffect(() => {
-    if (!post) {
-      navigate("/not-found");
-    }
-  }, [navigate, post]);
+    fetch(`http://localhost:3000/blog-post/slog/${slug}`)
+    .then((res) => res.json())
+    .then((data) => setPost(data))
+  }, []);
 
   return (
     <main className={styles.main}>
