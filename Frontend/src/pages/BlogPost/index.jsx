@@ -16,10 +16,19 @@ export const BlogPost = () => {
   const [post, setPost] = useState(null)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/blog-post/slog/${slug}`)
-    .then((res) => res.json())
+    fetch(`http://localhost:3000/blog-posts/slug/${slug}`)
+    .then((res) => {
+      if(res.status === 404) {
+        navigate('/not-found')
+      }
+      return res.json()
+    })
     .then((data) => setPost(data))
-  }, []);
+  }, [slug, navigate]);
+
+  if(!post) {
+      return <p>Carregando...</p>
+  }
 
   return (
     <main className={styles.main}>

@@ -1,5 +1,6 @@
 import styles from './comment.module.css'
 import { Avatar } from "../Avatar"
+import { ModalComment } from '../ModalComment'
 
 export const Comment = ({ comment }) => {
 
