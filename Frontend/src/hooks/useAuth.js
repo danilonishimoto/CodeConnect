@@ -49,13 +49,39 @@ export const useAuth = () => {
     }
   }
 
-  const login = (email, password) => {
-    
+  const login = async (email, password) => {
+        try {
+      const res = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        })
+      })
+
+      if(!res.ok) {
+        throw new Error('HTTP Error: ', res.status)
+      }
+
+      const data = await res.json()
+
+      setUser(data.user)
+      localStorage.setItem('auth_user', JSON.stringify(data.user))
+      localStorage.setItem('access_token', data.access_token)
+
+      return { success: true, user }
+    } catch (error) {
+      return { success: false, error: error.message }
+    }
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem('auth_user')
+    localStorage.removeItem('access_token')
   }
 
   const isAuthenticated = !!user
