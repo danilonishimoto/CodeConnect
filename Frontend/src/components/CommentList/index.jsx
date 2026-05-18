@@ -1,7 +1,9 @@
+import { useEffect } from "react"
 import { Comment } from "../Comment"
 import styles from './commentlist.module.css'
 
 export const CommentList = ({ comments }) => {
+
     return (
         <section className={styles.comments}>
             <h2>

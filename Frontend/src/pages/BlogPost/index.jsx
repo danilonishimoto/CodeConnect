@@ -9,29 +9,43 @@ import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { ModalComment } from "../../components/ModalComment";
-import { http } from "../../api"; 
+import { http } from "../../api";
 
 export const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState(null)
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+
+  const handleNewComment = (comment) => {
+    setComments((prev) => {
+      return prev.map((comment) => {
+      // Se for o comentário que acabei de editar, troco ele pela versão nova (updatedComment)
+      if (comment.id === updatedComment.id) {
+        return updatedComment;
+      }
+      // Se não for, mantenho o comentário antigo do jeito que estava
+      return comment;
+    })
+    })
+  }
 
   useEffect(() => {
-    http.get(`blog-posts/slug/${slug}`)
-    .then((res) => {
-      setPost(res.data)
-    })
-    .catch(error => {
-      if(error.status === 404) {
-        navigate('/not-found')
-      }
-    })
-
+    http
+      .get(`blog-posts/slug/${slug}`)
+      .then((res) => {
+        setPost(res.data);
+        setComments(res.data.comments)
+      })
+      .catch((error) => {
+        if (error.status === 404) {
+          navigate("/not-found");
+        }
+      });
   }, [slug, navigate]);
 
-
-  if(!post) {
-      return <p>Carregando...</p>
+  if (!post) {
+    return <p>Carregando...</p>;
   }
 
   return (
@@ -56,8 +70,8 @@ export const BlogPost = () => {
               <p>{post.likes}</p>
             </div>
             <div className={styles.action}>
-              <ModalComment />
-              <p>{post.comments.length}</p>
+              <ModalComment onSuccess={handleNewComment} postId={post?.id}/>
+              <p>{comments.length}</p>
             </div>
           </div>
           <Author author={post.author} />
@@ -67,7 +81,7 @@ export const BlogPost = () => {
       <div className={styles.code}>
         <ReactMarkdown>{post.markdown}</ReactMarkdown>
       </div>
-      <CommentList comments={post.comments} />
+      <CommentList comments={comments} />
     </main>
   );
 };
