@@ -10,32 +10,19 @@ import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { ModalComment } from "../../components/ModalComment";
 import { http } from "../../api";
+import { usePostInteractions } from "../../hooks/usePostInteractions";
 
 export const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
-
-  const handleNewComment = (comment) => {
-    setComments((prev) => {
-      return prev.map((comment) => {
-      // Se for o comentário que acabei de editar, troco ele pela versão nova (updatedComment)
-      if (comment.id === updatedComment.id) {
-        return updatedComment;
-      }
-      // Se não for, mantenho o comentário antigo do jeito que estava
-      return comment;
-    })
-    })
-  }
+  const { likes, comments, handleLikeButton, handleNewComment, handleDeleteComment, updateComments, updateLikes } = usePostInteractions(post)
 
   useEffect(() => {
     http
       .get(`blog-posts/slug/${slug}`)
       .then((res) => {
         setPost(res.data);
-        setComments(res.data.comments)
       })
       .catch((error) => {
         if (error.status === 404) {
@@ -43,6 +30,11 @@ export const BlogPost = () => {
         }
       });
   }, [slug, navigate]);
+  
+  useEffect(() => {
+    updateComments(comments)
+    updateLikes(likes)
+  }, [likes, comments])
 
   if (!post) {
     return <p>Carregando...</p>;
@@ -66,11 +58,11 @@ export const BlogPost = () => {
         <footer className={styles.footer}>
           <div className={styles.actions}>
             <div className={styles.action}>
-              <ThumbsUpButton loading={false} />
-              <p>{post.likes}</p>
+              <ThumbsUpButton loading={false} onClick={() => handleLikeButton(post.id)}/>
+              <p>{likes}</p>
             </div>
             <div className={styles.action}>
-              <ModalComment onSuccess={handleNewComment} postId={post?.id}/>
+              <ModalComment onSuccess={handleNewComment} postId={post?.id} />
               <p>{comments.length}</p>
             </div>
           </div>
@@ -81,7 +73,7 @@ export const BlogPost = () => {
       <div className={styles.code}>
         <ReactMarkdown>{post.markdown}</ReactMarkdown>
       </div>
-      <CommentList comments={comments} />
+      <CommentList comments={comments} onDelete={handleDeleteComment} />
     </main>
   );
 };

@@ -7,31 +7,14 @@ import { ModalComment } from "../ModalComment"
 import { useState } from "react"
 import { useAuth } from "../../hooks/useAuth"
 
+import { http } from "../../api"
+
+import { usePostInteractions } from "../../hooks/usePostInteractions"
+
 export const CardPost = ({ post }) => {
+    const { likes, handleLikeButton, handleNewComment, comments } = usePostInteractions(post)
 
-    const [likes, setLikes] = useState(post.likes)
-    const [comments, setComments] = useState(post.comments)
-
-    const { isAuthenticated} = useAuth()
-
-    const handleNewComment = (comment) => {
-        setComments([...comments, comment])
-    }
-
-    const handleLikeButton = () => {
-
-        const token = localStorage.getItem('access_token')
-
-        http.post(`blog-posts/${post.id}/like`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }    
-        })
-
-        .then(() => {
-            setLikes(prev => prev + 1);
-        })
-    }
+    const {isAuthenticated} = useAuth()
 
     return (
         <article className={styles.card}>
@@ -51,7 +34,7 @@ export const CardPost = ({ post }) => {
             <footer className={styles.footer}>
                 <div className={styles.actions}>
                     <div className={styles.action}>
-                        <ThumbsUpButton loading={false} onClick={handleLikeButton} disabled={!isAuthenticated}/>
+                        <ThumbsUpButton loading={false} onClick={() => handleLikeButton(post.id)} disabled={!isAuthenticated}/>
                         <p>
                             {likes}
                         </p>
